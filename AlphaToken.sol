@@ -3,55 +3,55 @@ pragma solidity ^0.8.30;
 
 contract AlphaToken {
     
-    // Declaraciones
+    // Declarations
     string public name = "Alpha Token";
     string public symbol = "APH";
-    uint256 public totalSupply = 1000000000000000000000000; // 1 millon de tokens
+    uint256 public totalSupply = 1000000000000000000000000; // 1 million tokens
     uint8 public decimals = 18;
 
-    // Evento para la transferencia de tokens de un usuario
-    event Transfer (
+    // Event for token transfer between users
+    event Transfer(
         address indexed _from,
         address indexed _to,
         uint256 _value
     );
 
-    // Evento para la aprobación de un operador
+    // Event for approving an operator
     event Approval(
         address indexed _owner,
         address indexed _spender,
         uint256 value
     );
 
-    // Estructuras de datos
+    // Data structures
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint)) public allowance;
 
     // Constructor
-    constructor(){
+    constructor() {
         balanceOf[msg.sender] = totalSupply;
     }
 
-    // Transferencia de tokens de un usuario
-    function transfer(address _to, uint256 _value) public returns (bool success){
-        require(balanceOf[msg.sender] >= _value);
+    // Transfer tokens from sender to another user
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value, "Insufficient balance");
         balanceOf[msg.sender] -= _value;
         balanceOf[_to] += _value;
         emit Transfer(msg.sender, _to, _value);
         return true;
     }
 
-    // Aprobacion de una cantidad 
-    function approve(address _spender, uint256 _value) public returns (bool success){
+    // Approve a certain amount for a spender
+    function approve(address _spender, uint256 _value) public returns (bool success) {
         allowance[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;
     }
 
-    // Transferencia de tokens especificando el emisor
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success){
-        require(_value <= balanceOf[_from]);
-        require(_value <= allowance[_from][msg.sender]);
+    // Transfer tokens on behalf of another user
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= balanceOf[_from], "Insufficient balance");
+        require(_value <= allowance[_from][msg.sender], "Allowance exceeded");
 
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;

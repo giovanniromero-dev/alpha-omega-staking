@@ -6,14 +6,14 @@ import "./OmegaToken.sol";
 
 contract TokenFarm {
 
-    // Declaraciones iniciales
+    // Initial declarations
     string public name = "Omega Token Farm";
     address public owner;
     AlphaToken public alphaToken;
     OmegaToken public omegaToken;
 
-    // Estructuras de datos
-    address [] public stakers;
+    // Data structures
+    address[] public stakers;
     mapping(address => uint) public stakingBalance;
     mapping(address => bool) public hasStaked;
     mapping(address => bool) public isStaking;
@@ -25,47 +25,47 @@ contract TokenFarm {
         owner = msg.sender;
     }
 
-    // Stake de tokens
+    // Stake tokens
     function stakeTokens(uint _amount) public {
-        // Se requiere una cantidad superior a 0
-        require(_amount > 0, "La cantidad no puede ser menor a 0");
-        // Transferir tokens Alpha al Smart Contract principal
+        // Require a valid amount greater than 0
+        require(_amount > 0, "Amount must be greater than 0");
+        // Transfer Alpha Tokens from the user to this smart contract
         alphaToken.transferFrom(msg.sender, address(this), _amount);
-        // Actualizar el saldo del staking
+        // Update staking balance
         stakingBalance[msg.sender] += _amount;
-        // Guardar el staker
-        if(!hasStaked[msg.sender]){
+        // Add the staker to the array if it's their first time staking
+        if (!hasStaked[msg.sender]) {
             stakers.push(msg.sender);
         }
-        // Actualizamos el estado del staking
+        // Update staking status
         isStaking[msg.sender] = true;
         hasStaked[msg.sender] = true;
     }
 
-    // Quitar el staking de los tokens
+    // Unstake tokens
     function unstakeTokens() public {
-        // Saldo del staking de un usuario
+        // Retrieve the staking balance for the user
         uint balance = stakingBalance[msg.sender];
-        // Se requiere una cantidad superior a 0
-        require(balance > 0, "El balance del staking es 0");
-        // Transferencia de los tokens al usuario
+        // Require that the staking balance is greater than 0
+        require(balance > 0, "Staking balance is 0");
+        // Transfer tokens back to the user
         alphaToken.transfer(msg.sender, balance);
-        // Resetea el balance de staking del usuario
+        // Reset staking balance for the user
         stakingBalance[msg.sender] = 0;
-        // Actualizar el estado del staking 
+        // Update staking status
         isStaking[msg.sender] = false;
     }
 
-    // Emision de Tokens (recompesas)
+    // Issue reward tokens
     function issueTokens() public {
-        // Unicamente ejecutable por el owner
-        require(msg.sender == owner, "No eres el owner");
-        // Emitir tokens a todos los stakers
-        for(uint i=0; i < stakers.length; i++){
+        // Only the owner can call this function
+        require(msg.sender == owner, "Caller must be the owner");
+        // Loop through all stakers and issue reward tokens
+        for (uint i = 0; i < stakers.length; i++) {
             uint balance = stakingBalance[stakers[i]];
-            if(balance > 0){
+            if (balance > 0) {
                 omegaToken.transfer(stakers[i], balance);
             }
         }
-    }   
+    }
 }
